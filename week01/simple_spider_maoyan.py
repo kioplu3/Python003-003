@@ -44,19 +44,10 @@ def parse_html_by_soup():
     hover_info = soup.find_all('div', class_='movie-hover-info')
     single_func = None
 
-    if move_info is not None and len(move_info) != 0:
-        print("frontpage type is move_info")
-        single_func = get_single_move_info
-        pass
-    elif hover_info is not None and len(hover_info) != 0:
-        print("frontpage type is hove_info")
-        move_info = hover_info
-        single_func = get_single_hover_info
-        pass
-    else:
-        print("move_info and hover_info items are none")
+    move_info, single_func = choice_move_info_parse_func(move_info, hover_info)
+    if move_info is None or single_func is None:
+        print("parse func is error")
         return
-
     if requirement_count > len(move_info):
         requirement_count = len(move_info)
 
@@ -71,15 +62,35 @@ def parse_html_by_soup():
     return result
 
 
+def choice_move_info_parse_func(move_info, hover_info):
+    single_func = None
+    moive_result = None
+    if move_info is not None and len(move_info) != 0:
+        print("frontpage type is move_info")
+        moive_result = move_info
+        single_func = get_single_move_info
+        pass
+    elif hover_info is not None and len(hover_info) != 0:
+        print("frontpage type is hove_info")
+        moive_result = hover_info
+        single_func = get_single_hover_info
+        pass
+    else:
+        print("move_info and hover_info items are none")
+
+    return moive_result, single_func
+
+
 def get_single_hover_info(hover_item):
     # 以“movie-hover-title为关键字”
-    name = hover_item.find('span',class_="name").string.strip()
+    name = hover_item.find('span', class_="name").string.strip()
     hover_titles = hover_item.find_all('span', class_='hover-tag')
-    if hover_titles is None or len(hover_titles) < 3 :
+    if hover_titles is None or len(hover_titles) < 3:
         return None
     categroy = hover_titles[0].next_sibling.string.strip()
     show_date = hover_titles[2].next_sibling.string.strip()
     return [name, show_date, categroy]
+
 
 def get_single_move_info(movie_item):
     name = movie_item.find('div', class_='title').string.strip()
